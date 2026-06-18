@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Révisions de grammaire P4 - Jeu</title>
+<style>
+  :root{--dark:#111;--light:#fff;--grey:#f2f2f2;--accent:#ffcf33;--ok:#59b36a;--bad:#ef6b6b;--blue:#6bb7ff;}
+  *{box-sizing:border-box} body{margin:0;font-family:Arial, sans-serif;background:linear-gradient(135deg,#fff,#f4f4f4);color:#111;}
+  .wrap{max-width:950px;margin:0 auto;padding:24px}.card{background:white;border:4px solid #111;border-radius:28px;box-shadow:8px 8px 0 #111;padding:24px;margin-top:20px}
+  h1{font-size:clamp(32px,6vw,58px);margin:0;text-align:center;letter-spacing:1px}.subtitle{text-align:center;font-size:20px;margin:8px 0 0}.badge{display:inline-block;background:var(--accent);border:3px solid #111;border-radius:999px;padding:7px 14px;font-weight:700;box-shadow:3px 3px 0 #111}
+  .top{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:18px}.progress{height:18px;background:#eee;border:3px solid #111;border-radius:99px;overflow:hidden;flex:1;min-width:220px}.bar{height:100%;width:0%;background:var(--blue);transition:.25s}
+  .question{font-size:26px;font-weight:800;line-height:1.25;margin:10px 0 8px}.theme{font-size:15px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#555}.answers{display:grid;gap:12px;margin-top:20px}.answer{border:3px solid #111;border-radius:18px;background:#fff;padding:15px 16px;font-size:20px;text-align:left;cursor:pointer;box-shadow:4px 4px 0 #111;transition:.1s}.answer:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #111}.answer:disabled{cursor:not-allowed}.answer.correct{background:#d9f5df}.answer.wrong{background:#ffd9d9}
+  .feedback{font-size:20px;font-weight:700;margin-top:18px;min-height:30px}.btn{border:3px solid #111;border-radius:16px;background:var(--accent);padding:13px 20px;font-weight:900;font-size:18px;box-shadow:4px 4px 0 #111;cursor:pointer}.btn:hover{transform:translate(-1px,-1px)}.btn.secondary{background:#fff}.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}.hidden{display:none}.score{text-align:center;font-size:28px;font-weight:900}.small{text-align:center;color:#555}.pillrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px}.pill{border:2px solid #111;border-radius:99px;padding:7px 10px;background:#f7f7f7;font-weight:700}.emoji{font-size:50px;text-align:center}.inputBox{width:100%;font-size:22px;padding:14px;border:3px solid #111;border-radius:16px;margin-top:15px}.credit{text-align:center;margin-top:20px;font-size:13px;color:#555}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="start">
+    <h1>🧠 Mission Grammaire</h1>
+    <p class="subtitle">Révisions P4 — 30 questions pour s’entrainer</p>
+    <div class="pillrow"><span class="pill">Phrase</span><span class="pill">Ponctuation</span><span class="pill">Classes de mots</span><span class="pill">GS / GP / GCCP</span><span class="pill">CDV / CIV</span></div>
+    <div class="actions"><button class="btn" onclick="startGame()">Commencer le jeu</button></div>
+  </div>
+
+  <div class="card hidden" id="game">
+    <div class="top"><span class="badge" id="counter">Question 1/30</span><div class="progress"><div class="bar" id="bar"></div></div><span class="badge" id="scoreTop">Score : 0</span></div>
+    <div class="theme" id="theme"></div>
+    <div class="question" id="question"></div>
+    <input id="textAnswer" class="inputBox hidden" placeholder="Écris ta réponse ici..." />
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="checkBtn" onclick="checkText()">Vérifier</button><button class="btn hidden" id="nextBtn" onclick="nextQuestion()">Question suivante</button></div>
+  </div>
+
+  <div class="card hidden" id="end">
+    <div class="emoji" id="emoji">🏆</div><h1>Mission terminée !</h1><p class="score" id="finalScore"></p><p class="small" id="finalMsg"></p>
+    <div class="actions"><button class="btn" onclick="restart()">Rejouer</button></div>
+  </div>
+  <p class="credit">© La grande instit — jeu de révision généré à partir du dossier de grammaire.</p>
+</div>
+<script>
+const questions = [
+{t:'La phrase',q:'Quelle phrase est correcte ?',a:['la maitresse efface le tableau','La maitresse efface le tableau.','Le tableau la maitresse efface.','La maitresse efface le tableau'],c:1,e:'Une phrase commence par une majuscule, a du sens et se termine par un point.'},
+{t:'La phrase',q:'Quel élément manque ? « les élèves jouent sous le préau. »',a:['La majuscule','Le point','L’ordre des mots','Rien'],c:0,e:'Il manque la majuscule au début.'},
+{t:'La phrase',q:'Remets dans l’ordre : « adorent - jouer - au ballon - mes copains »',type:'text',answers:['mes copains adorent jouer au ballon','mes copains adorent jouer au ballon.'],e:'Réponse possible : Mes copains adorent jouer au ballon.'},
+{t:'Phrase négative',q:'Quelle phrase négative est correcte ?',a:['Je dors pas chez mamy.','Je ne dors pas chez mamy.','Je dors ne pas chez mamy.','Je pas dors chez mamy.'],c:1,e:'On utilise souvent deux mots : ne… pas.'},
+{t:'Phrase négative',q:'Transforme en négatif : « Sarah va à son cours de danse. »',type:'text',answers:['sarah ne va pas à son cours de danse','sarah ne va pas à son cours de danse.'],e:'Il fallait écrire : Sarah ne va pas à son cours de danse.'},
+{t:'Phrase négative',q:'« Il ne skie jamais. » est…',a:['affirmative','négative correcte','négative incorrecte','une question'],c:1,e:'Ne… jamais indique la négation.'},
+{t:'Ponctuation',q:'Quel signe termine une question ?',a:['.','!','?',','],c:2,e:'Le point d’interrogation sert à poser une question.'},
+{t:'Ponctuation',q:'Complète : « Attention au ballon ___ »',a:['.','?','!',','],c:2,e:'On exprime un avertissement : point d’exclamation.'},
+{t:'Ponctuation',q:'Quel signe annonce une liste ou des paroles ?',a:['La virgule','Les deux points','Les guillemets','Les parenthèses'],c:1,e:'Les deux points annoncent une liste, une explication ou des paroles.'},
+{t:'Marques de la phrase',q:'« Range ton manteau dans le vestiaire. » sert à…',a:['informer','poser une question','donner un ordre / un conseil','raconter une blague'],c:2,e:'C’est une phrase qui demande de faire quelque chose.'},
+{t:'Marques de la phrase',q:'« Pourquoi arrives-tu en retard ? » sert à…',a:['informer','poser une question','donner un ordre','énumérer'],c:1,e:'La phrase pose une question.'},
+{t:'Noms communs / propres',q:'Dans « La ville de Bruxelles », Bruxelles est…',a:['un nom commun','un nom propre','un adjectif','un déterminant'],c:1,e:'Bruxelles est un nom propre : il prend une majuscule.'},
+{t:'Noms communs / propres',q:'Quel mot est un nom commun ?',a:['Liège','Allemagne','girafe','Aldi'],c:2,e:'Girafe est un nom commun.'},
+{t:'Noms communs / propres',q:'Quel mot n’est PAS un nom ?',a:['souris','rivière','courir','baignoire'],c:2,e:'Courir est un verbe à l’infinitif.'},
+{t:'Déterminants',q:'Dans « mon canapé », mon est…',a:['un déterminant possessif','un nom commun','un adjectif','un verbe'],c:0,e:'Mon indique à qui appartient le canapé.'},
+{t:'Déterminants',q:'Quel déterminant convient devant « oiseaux » ?',a:['un','une','des','ce'],c:2,e:'Oiseaux est au pluriel : des oiseaux.'},
+{t:'Déterminants',q:'« ce, cet, cette, ces » sont des déterminants…',a:['possessifs','démonstratifs','interrogatifs','exclamatifs'],c:1,e:'Ils servent à montrer : ce chien, cette fille…'},
+{t:'Adjectifs',q:'Dans « un joli pull blanc », quels mots sont des adjectifs ?',a:['un / pull','joli / blanc','pull / blanc','un / joli'],c:1,e:'Joli et blanc donnent des précisions sur le pull.'},
+{t:'Adjectifs',q:'Quel est l’intrus ?',a:['grande','longue','cahier','rouge'],c:2,e:'Cahier est un nom, pas un adjectif.'},
+{t:'Adjectifs',q:'Complète : « les ___ cabanes » avec l’adjectif grand.',a:['grand','grande','grands','grandes'],c:3,e:'Cabanes est féminin pluriel : grandes.'},
+{t:'Genre et nombre',q:'« des pommes vertes » est…',a:['masculin singulier','féminin singulier','masculin pluriel','féminin pluriel'],c:3,e:'Pommes est féminin pluriel.'},
+{t:'Genre et nombre',q:'Complète : « la nappe ___ » avec blanc.',a:['blanc','blanche','blancs','blanches'],c:1,e:'Nappe est féminin singulier : blanche.'},
+{t:'Classes de mots',q:'Dans « Elle cuisine une tarte rapidement », rapidement est…',a:['un nom','un verbe','un adverbe','un déterminant'],c:2,e:'Rapidement est un adverbe.'},
+{t:'Classes de mots',q:'Dans « Rayan et Noa partent », et est…',a:['un connecteur','un nom propre','un pronom personnel','un adjectif'],c:0,e:'Et relie deux éléments : c’est un connecteur.'},
+{t:'Adverbes',q:'Quel mot est l’intrus ?',a:['violemment','joyeusement','appartement','silencieusement'],c:2,e:'Appartement est un nom, pas un adverbe.'},
+{t:'Connecteurs',q:'Choisis : « Le chien aboie ___ il entend un bruit. »',a:['sous','car','puis','dans'],c:1,e:'Car introduit une cause / explication.'},
+{t:'Connecteurs',q:'« D’abord, ensuite, puis, enfin » sont des connecteurs…',a:['de lieu','de temps / énumération','de négation','de quantité'],c:1,e:'Ils indiquent l’ordre des actions.'},
+{t:'Constituants',q:'Dans « Le petit lapin blanc grignote une carotte. », le GS est…',a:['Le petit lapin blanc','grignote une carotte','une carotte','blanc grignote'],c:0,e:'Le GS indique de qui on parle.'},
+{t:'Constituants',q:'Dans « Hier, la tortue traversait le chemin. », « Hier » est…',a:['GS','GP','GCCP','CDV'],c:2,e:'Hier précise le temps : c’est un GCCP.'},
+{t:'CDV / CIV',q:'Dans « Les élèves parlent de leur week-end. », le complément souligné serait…',a:['CDV','CIV','GS','adjectif'],c:1,e:'On pose la question : ils parlent de quoi ? de leur week-end. C’est un CIV.'}
+];
+let i=0, score=0, answered=false;
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,"'").replace(/\s+/g,' ').trim().replace(/[.!?]$/,'');}
+function startGame(){document.getElementById('start').classList.add('hidden');document.getElementById('game').classList.remove('hidden');showQ();}
+function showQ(){answered=false;const qu=questions[i];document.getElementById('counter').textContent=`Question ${i+1}/30`;document.getElementById('scoreTop').textContent=`Score : ${score}`;document.getElementById('bar').style.width=`${(i)/questions.length*100}%`;document.getElementById('theme').textContent=qu.t;document.getElementById('question').textContent=qu.q;document.getElementById('feedback').textContent='';document.getElementById('nextBtn').classList.add('hidden');const ans=document.getElementById('answers');ans.innerHTML='';const input=document.getElementById('textAnswer');input.value='';input.classList.toggle('hidden',qu.type!=='text');document.getElementById('checkBtn').classList.toggle('hidden',qu.type!=='text'); if(qu.type==='text'){input.focus();return;} qu.a.forEach((x,idx)=>{const b=document.createElement('button');b.className='answer';b.textContent=x;b.onclick=()=>choose(idx,b);ans.appendChild(b);});}
+function choose(idx,btn){if(answered)return;answered=true;const qu=questions[i];document.querySelectorAll('.answer').forEach((b,k)=>{b.disabled=true;if(k===qu.c)b.classList.add('correct');});if(idx===qu.c){score++;btn.classList.add('correct');document.getElementById('feedback').textContent='✅ Bravo ! '+qu.e;}else{btn.classList.add('wrong');document.getElementById('feedback').textContent='❌ Oups ! '+qu.e;}document.getElementById('scoreTop').textContent=`Score : ${score}`;document.getElementById('nextBtn').classList.remove('hidden');}
+function checkText(){if(answered)return;answered=true;const qu=questions[i];const val=norm(document.getElementById('textAnswer').value);const ok=qu.answers.map(norm).includes(val);if(ok){score++;document.getElementById('feedback').textContent='✅ Bravo ! '+qu.e;}else{document.getElementById('feedback').textContent='❌ Réponse attendue : '+qu.e;}document.getElementById('scoreTop').textContent=`Score : ${score}`;document.getElementById('checkBtn').classList.add('hidden');document.getElementById('nextBtn').classList.remove('hidden');}
+function nextQuestion(){i++; if(i>=questions.length){endGame();}else showQ();}
+function endGame(){document.getElementById('game').classList.add('hidden');document.getElementById('end').classList.remove('hidden');document.getElementById('bar').style.width='100%';document.getElementById('finalScore').textContent=`Score final : ${score} / ${questions.length}`;let msg=''; if(score>=27){msg='Incroyable, tu es un·e champion·ne de grammaire !';document.getElementById('emoji').textContent='🏆'}else if(score>=20){msg='Très beau travail ! Encore un petit entrainement et ce sera parfait.';document.getElementById('emoji').textContent='👏'}else if(score>=15){msg='Pas mal ! Relis bien les corrections et recommence une partie.';document.getElementById('emoji').textContent='💪'}else{msg='Courage ! On révise encore et on progresse.';document.getElementById('emoji').textContent='🌱'}document.getElementById('finalMsg').textContent=msg;}
+function restart(){i=0;score=0;document.getElementById('end').classList.add('hidden');document.getElementById('game').classList.remove('hidden');showQ();}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(!document.getElementById('checkBtn').classList.contains('hidden'))checkText();else if(!document.getElementById('nextBtn').classList.contains('hidden'))nextQuestion();}})
+</script>
+</body>
+</html>
